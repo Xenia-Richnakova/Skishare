@@ -1,29 +1,35 @@
 import { useRef, useState } from 'react';
 import Card from 'react-bootstrap/Card';
 
-function drawCircle(ctx: CanvasRenderingContext2D | null, x: number, y: number, mouseDown:boolean) {
-    if (ctx === null || !mouseDown) {
+function drawLine(ctx: CanvasRenderingContext2D | null, x: number, y: number, previous: MousePosition, mouseDown:boolean) {
+    if (ctx === null || previous === undefined || !mouseDown) {
         return
     }
     ctx.beginPath();
-    ctx.arc(x, y, 1, 0, 2 * Math.PI);
+    ctx.moveTo(previous.x, previous.y);
+    ctx.lineTo(x, y);
     ctx.stroke();
 }
+type MousePosition = {
+  x:number, 
+  y:number 
+} | undefined;
 
 export default function Canvas() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const [previousPosition, setPreviousPosition] = useState<MousePosition>(undefined)
     const [mouseDown, setMouseDown] = useState(false)
   
     const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
       if (canvasRef.current === null) {
         return;
       }
+
       const rect = canvasRef.current.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
-      drawCircle(canvasRef.current.getContext("2d"), x, y, mouseDown);
-      console.log(`Mouse position: x=${x}, y=${y}`);
-      console.log(canvasRef.current.width, canvasRef.current.height)
+      drawLine(canvasRef.current.getContext("2d"), x, y, previousPosition, mouseDown);
+      setPreviousPosition({x, y})
     };
 
     return (
@@ -35,8 +41,15 @@ export default function Canvas() {
           style={{ width: '1000', height: '500', border: "solid"}}
           ref={canvasRef}
           onMouseMove={handleMouseMove}
-          onMouseDown={()=> setMouseDown(true)}
-          onMouseUp={()=> setMouseDown(false)}
+          onMouseDown={() => setMouseDown(true)}
+          onMouseUp={() => {
+            setMouseDown(false)
+            setPreviousPosition(undefined)
+          }}
+          onMouseLeave={() => {
+            setMouseDown(false)
+            setPreviousPosition(undefined)
+          }}
         ></canvas>
         </div>
       </Card>
