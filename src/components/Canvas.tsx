@@ -15,6 +15,11 @@ function drawLine(ctx: CanvasRenderingContext2D | null, x: number, y: number, pr
     ctx.strokeStyle = color;
     ctx.lineWidth = width
     ctx.stroke();
+
+    ctx.beginPath()
+    ctx.lineWidth = width*0.5
+    ctx.arc(x, y, 1, 0, 2*Math.PI)
+    ctx.stroke();
 }
 type MousePosition = {
   x:number, 
@@ -59,7 +64,7 @@ export default function Canvas() {
             setPreviousPosition(undefined)
           }}
         ></canvas>
-        <Controls></Controls>
+        <Controls canvasRef={canvasRef}></Controls>
         </div>
         <Palet></Palet>
       </Card>
